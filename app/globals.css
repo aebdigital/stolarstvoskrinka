@@ -1,0 +1,328 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #b48454;
+  --color-primary-light: #d1a67a;
+  --color-primary-dark: #8c653f;
+  --color-secondary: #1c1917;
+  --color-muted: #6b6b6b;
+  --color-page: #fcfaf7;
+  --font-heading: "DM Serif Display", Georgia, serif;
+  --font-sans: Inter, Arial, sans-serif;
+}
+
+:root {
+  --color-primary: #b48454;
+  --color-primary-dark: #8c653f;
+  --color-secondary: #1c1917;
+  --color-muted: #6b6b6b;
+  --color-bg: #fcfaf7;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background-color: var(--color-bg);
+  background-image: linear-gradient(rgba(252, 250, 247, 0.92), rgba(252, 250, 247, 0.92)), url("/texture.svg");
+  background-position: center top;
+  background-size: auto, 1280px auto;
+  color: var(--color-secondary);
+  font-family: var(--font-sans);
+}
+
+.bg-page {
+  background-color: var(--color-bg);
+  background-image: linear-gradient(rgba(252, 250, 247, 0.9), rgba(252, 250, 247, 0.9)), url("/texture.svg");
+  background-position: center top;
+  background-size: auto, 1280px auto;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: var(--color-secondary);
+}
+
+.heading-serif {
+  font-family: var(--font-heading);
+  font-style: italic;
+  letter-spacing: 0;
+}
+
+.brand-serif {
+  font-family: var(--font-heading);
+  letter-spacing: 0;
+}
+
+.divider-line {
+  display: inline-block;
+  width: 40px;
+  height: 1px;
+  flex: 0 0 40px;
+  background-color: var(--color-primary);
+}
+
+.site-header {
+  background-color: rgba(28, 25, 23, 0.96);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(28, 25, 23, 0.12);
+  transition: background-color 0.5s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.5s ease, height 0.5s ease;
+}
+
+.site-header.scrolled {
+  background-color: rgba(28, 25, 23, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.rolling-text {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.rolling-text-inner {
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.rolling-text-inner::after {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 100%;
+  line-height: inherit;
+  content: attr(data-text);
+}
+
+.group:hover .rolling-text-inner,
+.rolling-trigger:hover .rolling-text-inner,
+.rolling-text:hover .rolling-text-inner {
+  transform: translateY(-100%);
+}
+
+.page-transition {
+  animation: pageFadeUp 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.image-reveal-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-reveal-shutter {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background-color: var(--color-secondary);
+  transition: transform 1.2s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.image-reveal-wrapper.is-revealed .image-reveal-shutter {
+  transform: translateY(-100%);
+}
+
+.image-reveal-img {
+  transform: scale(1.15);
+  transition: transform 1.8s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.image-reveal-wrapper.is-revealed .image-reveal-img {
+  transform: scale(1);
+}
+
+.image-reveal-wrapper:hover .image-reveal-img {
+  transform: scale(1.05);
+}
+
+.filter-btn {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.filter-btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
+  border-color: var(--color-primary);
+}
+
+.gallery-grid-motion {
+  animation: galleryGridSwitch 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.gallery-grid-motion > button {
+  animation: galleryCardIn 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lightbox-overlay-motion {
+  animation: lightboxOverlayIn 0.24s ease-out both;
+}
+
+.lightbox-panel-motion {
+  animation: lightboxPanelIn 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lightbox-image-motion {
+  animation: lightboxImageOpen 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lightbox-image-motion[data-direction="next"] {
+  animation-name: lightboxImageNext;
+}
+
+.lightbox-image-motion[data-direction="prev"] {
+  animation-name: lightboxImagePrevious;
+}
+
+.cookie-banner {
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.cookie-banner.is-visible {
+  transform: translateY(0);
+}
+
+.cookie-revisit {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.cookie-revisit.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageFadeUp {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes galleryGridSwitch {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes galleryCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lightboxOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lightboxPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lightboxImageOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lightboxImageNext {
+  from {
+    opacity: 0;
+    transform: translateX(26px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes lightboxImagePrevious {
+  from {
+    opacity: 0;
+    transform: translateX(-26px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
