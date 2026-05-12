@@ -19,7 +19,7 @@ export const galleryCategories = [
     "slug": "kuchyne",
     "label": "Kuchyne",
     "description": "Kuchynské linky a kuchynský nábytok navrhnutý pre konkrétny priestor.",
-    "imageCount": 26
+    "imageCount": 28
   },
   {
     "slug": "vstavane-skrine",
@@ -255,6 +255,22 @@ export const galleryImages = [
     "src": "/referencie/kuchyne/kuchyne-26.jpg",
     "title": "Kuchyne 26",
     "alt": "STOLÁRSTVO SKRINKA - kuchyne realizácia 26"
+  },
+  {
+    "id": "kuchyne-27",
+    "category": "kuchyne",
+    "categoryLabel": "Kuchyne",
+    "src": "/referencie/kuchyne/kuchyne-27.jpg",
+    "title": "Kuchyne 27",
+    "alt": "STOLÁRSTVO SKRINKA - kuchyne realizácia 27"
+  },
+  {
+    "id": "kuchyne-28",
+    "category": "kuchyne",
+    "categoryLabel": "Kuchyne",
+    "src": "/referencie/kuchyne/kuchyne-28.jpg",
+    "title": "Kuchyne 28",
+    "alt": "STOLÁRSTVO SKRINKA - kuchyne realizácia 28"
   },
   {
     "id": "vstavane-skrine-01",

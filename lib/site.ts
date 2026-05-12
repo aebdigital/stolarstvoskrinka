@@ -6,7 +6,7 @@ export const siteConfig = {
   locale: "sk_SK",
   phone: "+421903521572",
   phoneDisplay: "0903 521 572",
-  email: "",
+  email: "pazin@centrum.sk",
   address: {
     street: "Herlianská 2230/27",
     locality: "Prešov",

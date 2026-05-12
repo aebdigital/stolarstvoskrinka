@@ -54,8 +54,8 @@ export default function Home() {
 
                 <Reveal delay={200}>
                   <RevealImage
-                    src={featuredImages.about.src}
-                    alt={featuredImages.about.alt}
+                    src="/about.jpg"
+                    alt="STOLÁRSTVO SKRINKA - poctivá práca a spokojný zákazník"
                     className="aspect-[4/3] shadow-2xl lg:aspect-[5/4]"
                     sizes="(min-width: 1024px) 45vw, 95vw"
                   />
