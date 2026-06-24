@@ -1,7 +1,8 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import Script from "next/script";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { RollingText } from "@/components/RollingText";
 
 type SubmitState = {
@@ -9,16 +10,94 @@ type SubmitState = {
   message: string;
 };
 
+type TurnstileOptions = {
+  sitekey: string;
+  theme: "light" | "dark" | "auto";
+  language: string;
+  callback: (token: string) => void;
+  "expired-callback": () => void;
+  "error-callback": () => void;
+};
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement, options: TurnstileOptions) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
+
+const turnstileSiteKey =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAADqPsY1iT5RmXROu";
+
 export function ContactForm() {
   const [submitState, setSubmitState] = useState<SubmitState>({
     status: "idle",
     message: ""
   });
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileError, setTurnstileError] = useState("");
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (
+      !turnstileReady ||
+      !window.turnstile ||
+      !turnstileContainerRef.current ||
+      turnstileWidgetIdRef.current
+    ) {
+      return;
+    }
+
+    turnstileWidgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
+      sitekey: turnstileSiteKey,
+      theme: "dark",
+      language: "sk",
+      callback: (token) => {
+        setTurnstileToken(token);
+        setTurnstileError("");
+      },
+      "expired-callback": () => {
+        setTurnstileToken("");
+        setTurnstileError("Overenie vypršalo. Prosím, skúste to znova.");
+      },
+      "error-callback": () => {
+        setTurnstileToken("");
+        setTurnstileError("Bezpečnostné overenie sa nepodarilo načítať.");
+      }
+    });
+
+    return () => {
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetIdRef.current);
+        turnstileWidgetIdRef.current = null;
+      }
+    };
+  }, [turnstileReady]);
+
+  const resetTurnstile = () => {
+    if (turnstileWidgetIdRef.current && window.turnstile) {
+      window.turnstile.reset(turnstileWidgetIdRef.current);
+    }
+    setTurnstileToken("");
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
+
+    if (!turnstileToken) {
+      setSubmitState({
+        status: "error",
+        message: "Pred odoslaním prosím dokončite bezpečnostné overenie."
+      });
+      return;
+    }
 
     setSubmitState({ status: "loading", message: "Odosielame správu..." });
 
@@ -28,7 +107,10 @@ export function ContactForm() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(Object.fromEntries(formData.entries()))
+        body: JSON.stringify({
+          ...Object.fromEntries(formData.entries()),
+          turnstileToken
+        })
       });
 
       const result = (await response.json().catch(() => null)) as { message?: string } | null;
@@ -47,6 +129,8 @@ export function ContactForm() {
         status: "error",
         message: error instanceof Error ? error.message : "Správu sa nepodarilo odoslať."
       });
+    } finally {
+      resetTurnstile();
     }
   };
 
@@ -54,6 +138,12 @@ export function ContactForm() {
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit} data-netlify-contact noValidate>
+      <Script
+        id="cloudflare-turnstile"
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+        strategy="afterInteractive"
+        onReady={() => setTurnstileReady(true)}
+      />
       <h3 className="heading-serif mb-6 text-2xl text-white">Kontaktný formulár</h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <input
@@ -94,6 +184,11 @@ export function ContactForm() {
         Súhlas so spracovaním osobných údajov
       </label>
 
+      <div>
+        <div ref={turnstileContainerRef} className="min-h-[65px]" />
+        {turnstileError && <p className="mt-2 text-xs text-red-200">{turnstileError}</p>}
+      </div>
+
       {submitState.message && (
         <div
           role="status"
@@ -113,7 +208,7 @@ export function ContactForm() {
 
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isLoading || !turnstileToken}
         className="group rolling-trigger flex w-full items-center justify-center gap-3 bg-primary py-4 text-sm font-semibold uppercase text-secondary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isLoading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}

@@ -1,4 +1,5 @@
 const SMTP2GO_ENDPOINT = "https://api.smtp2go.com/v3/email/send";
+const TURNSTILE_VERIFY_ENDPOINT = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -18,8 +19,9 @@ exports.handler = async (event) => {
   const recipient = process.env.CONTACT_FORM_RECIPIENT;
   const apiKey = process.env.SMTP2GO_API_KEY;
   const sender = process.env.SMTP2GO_SENDER;
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
 
-  if (!recipient || !apiKey || !sender) {
+  if (!recipient || !apiKey || !sender || !turnstileSecret) {
     return json(500, { message: "Kontaktný formulár nie je správne nakonfigurovaný." });
   }
 
@@ -36,6 +38,7 @@ exports.handler = async (event) => {
   const subject = String(payload.subject || "Nový dopyt z webu STOLÁRSTVO SKRINKA").trim();
   const message = String(payload.message || "").trim();
   const privacy = String(payload.privacy || "").trim();
+  const turnstileToken = String(payload.turnstileToken || "").trim();
 
   if (name.length < 2) {
     return json(400, { message: "Prosím, vyplňte meno." });
@@ -51,6 +54,39 @@ exports.handler = async (event) => {
 
   if (privacy !== "accepted") {
     return json(400, { message: "Pre odoslanie je potrebný súhlas so spracovaním údajov." });
+  }
+
+  if (!turnstileToken) {
+    return json(400, { message: "Chýba bezpečnostné overenie. Obnovte stránku a skúste to znova." });
+  }
+
+  const clientIp = getClientIp(event.headers || {});
+  const turnstileForm = new URLSearchParams({
+    secret: turnstileSecret,
+    response: turnstileToken
+  });
+
+  if (clientIp) {
+    turnstileForm.set("remoteip", clientIp);
+  }
+
+  try {
+    const turnstileResponse = await fetch(TURNSTILE_VERIFY_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: turnstileForm.toString()
+    });
+    const turnstileResult = await turnstileResponse.json().catch(() => null);
+
+    if (!turnstileResponse.ok || !turnstileResult?.success) {
+      console.warn("Turnstile verification failed", turnstileResult?.["error-codes"] || []);
+      return json(400, { message: "Bezpečnostné overenie zlyhalo. Skúste to prosím znova." });
+    }
+  } catch (error) {
+    console.error("Turnstile verification error", error);
+    return json(502, { message: "Bezpečnostné overenie je dočasne nedostupné. Skúste to prosím neskôr." });
   }
 
   const textBody = [
@@ -111,4 +147,14 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function getClientIp(headers) {
+  const forwardedFor = headers["x-forwarded-for"];
+
+  return (
+    headers["x-nf-client-connection-ip"] ||
+    headers["client-ip"] ||
+    (forwardedFor ? forwardedFor.split(",")[0].trim() : "")
+  );
 }
